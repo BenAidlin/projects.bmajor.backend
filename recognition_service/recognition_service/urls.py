@@ -16,9 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-import debug_toolbar
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('chord_detector', include('chord_detector.urls'))
+    path('chord_detector/', include('chord_detector.urls'))
 ]

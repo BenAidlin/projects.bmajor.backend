@@ -6,8 +6,8 @@
 <body>  
     <h1>Chord Detection Result</h1>  
     <ul>  
-        {% for timestamp, chord in result %}  
-            <li>{{ timestamp }}: {{ chord }}</li>  
+        {% for start, end, chord in result %}  
+            <li>{{ start }} - {{ end }}: {{ chord }}</li>  
         {% endfor %}  
     </ul>  
     <a href="{% url 'upload_audio' %}">Upload another file</a>  
