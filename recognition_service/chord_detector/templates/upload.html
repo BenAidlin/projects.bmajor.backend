@@ -1,14 +1,64 @@
-<!DOCTYPE html>  
-<html>  
-<head>  
-    <title>Upload Audio</title>  
-</head>  
-<body>  
-    <h1>Upload an Audio File</h1>  
-    <form method="post" enctype="multipart/form-data">  
-        {% csrf_token %}  
-        {{ form.as_p }}  
-        <button type="submit">Upload</button>  
-    </form>  
-</body>  
-</html>  
+<!DOCTYPE html>    
+<html>    
+<head>    
+    <title>Upload Audio</title>    
+</head>    
+<body>    
+    <h1>Upload an Audio File</h1>    
+    <form method="post" enctype="multipart/form-data">    
+        {% csrf_token %}    
+        {{ form.as_p }}    
+        <button type="submit">Upload</button>    
+    </form>    
+    <h2>Or Record Audio</h2>    
+    <button id="start">Start Recording</button>    
+    <button id="stop" disabled>Stop Recording</button>    
+    <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>  
+    <script>    
+        let recorder;    
+        const startButton = document.getElementById('start');    
+        const stopButton = document.getElementById('stop');    
+        function getCookie(name) {    
+            let cookieValue = null;    
+            if (document.cookie && document.cookie !== '') {    
+                const cookies = document.cookie.split(';');    
+                for (let i = 0; i < cookies.length; i++) {    
+                    const cookie = cookies[i].trim();    
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {    
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));    
+                        break;    
+                    }    
+                }    
+            }    
+            return cookieValue;    
+        }    
+        startButton.onclick = function() {    
+            let audio_context = new (window.AudioContext || window.webkitAudioContext)();  
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {    
+                let input = audio_context.createMediaStreamSource(stream);  
+                recorder = new Recorder(input);    
+                recorder.record();    
+                stopButton.disabled = false;    
+                startButton.disabled = true;    
+            }).catch(console.error);    
+        };  
+          
+        stopButton.onclick = function() {    
+            recorder.stop();    
+            startButton.disabled = false;    
+            stopButton.disabled = true;    
+            recorder.exportWAV(function(blob){  
+                let fd = new FormData();    
+                fd.append('file', blob, 'record.wav');    
+                fetch('/chord_detector/record/', {    
+                    method: 'POST',     
+                    headers: {    
+                        'X-CSRFToken': getCookie('csrftoken'),    
+                    },    
+                    body: fd    
+                });  
+            });    
+        };    
+    </script>    
+</body>    
+</html>    

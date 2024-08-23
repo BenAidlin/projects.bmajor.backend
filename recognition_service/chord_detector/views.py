@@ -12,3 +12,10 @@ def upload_audio(request):
     else:  
         form = UploadFileForm()  
     return render(request, 'upload.html', {'form': form})  
+
+def record_audio(request):
+    if request.method == 'POST':
+        file = request.FILES.get('file')
+        result = process_audio_file(file)
+        return render(request, 'result.html', {'result': result})
+    return render(request, 'upload.html')
