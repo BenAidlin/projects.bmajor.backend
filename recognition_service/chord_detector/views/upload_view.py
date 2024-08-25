@@ -1,18 +1,18 @@
+from django.http import JsonResponse
 from django.shortcuts import render  
 from django.views import View  
-from ..forms import UploadFileForm  
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from ..utils import process_audio_file  
 
-# upload audio is an example using django's forms. not really applicable in a pure backend application
+@method_decorator(csrf_exempt, name='dispatch') 
 class UploadAudioView(View):  
     def get(self, request, *args, **kwargs):  
-        form = UploadFileForm()  
-        return render(request, 'upload.html', {'form': form})  
+        return render(request, 'upload.html')  
       
     def post(self, request, *args, **kwargs):  
-        form = UploadFileForm(request.POST, request.FILES)  
-        if form.is_valid():  
-            audio_file = request.FILES['audio_file']  
+        audio_file = request.FILES.get('file')  
+        if audio_file:  
             result = process_audio_file(audio_file)  
-            return render(request, 'result.html', {'result': result})  
-        return render(request, 'upload.html', {'form': form})  
+            return JsonResponse({'result': result})  
+        return JsonResponse({'error': 'Invalid file'}, status=400)  
